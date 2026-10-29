@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дневник аллергенов</title>
+<meta name="description" content="Дневник прикорма для малышей 4–24 месяцев: какие аллергены ввели, когда давали последний раз и когда пора повторить.">
+<style>
+  :root {
+    --bg: #fbf8f4;
+    --surface: #ffffff;
+    --surface-2: #f3eee7;
+    --text: #2a2622;
+    --muted: #6d655d;
+    --line: #e6dfd5;
+    --accent: #c4572f;
+    --accent-ink: #ffffff;
+    --ok: #3c7d4f;
+    --ok-bg: #e5f1e8;
+    --warn: #9a6a08;
+    --warn-bg: #fbf0d6;
+    --bad: #b23a3a;
+    --bad-bg: #f8e2e0;
+    --idle: #6d655d;
+    --idle-bg: #efebe5;
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a18; --surface: #262320; --surface-2: #2f2b27; --text: #f1ece6; --muted: #b3aaa0;
+      --line: #3b3631; --accent: #e8794f; --accent-ink: #1c1a18;
+      --ok: #7fc493; --ok-bg: #233a2b; --warn: #e3b552; --warn-bg: #3d321a;
+      --bad: #ee8b84; --bad-bg: #452523; --idle: #b3aaa0; --idle-bg: #34302b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1a18; --surface: #262320; --surface-2: #2f2b27; --text: #f1ece6; --muted: #b3aaa0;
+    --line: #3b3631; --accent: #e8794f; --accent-ink: #1c1a18;
+    --ok: #7fc493; --ok-bg: #233a2b; --warn: #e3b552; --warn-bg: #3d321a;
+    --bad: #ee8b84; --bad-bg: #452523; --idle: #b3aaa0; --idle-bg: #34302b;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; }
+  .brand { font-weight: 700; letter-spacing: -0.01em; }
+  .langs { display: flex; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 4px; }
+  .langs button {
+    border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer; min-height: 36px;
+  }
+  .langs button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+  .hero { display: grid; gap: 32px; align-items: center; padding: 24px 0 48px; }
+  @media (min-width: 820px) { .hero { grid-template-columns: 1.1fr 0.9fr; padding: 48px 0 64px; } }
+  h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 16px; text-wrap: balance; }
+  .lead { font-size: 18px; color: var(--muted); margin: 0 0 24px; max-width: 34em; }
+  .cta {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px;
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px;
+    font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+  }
+  .cta:focus-visible, .langs button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .note { font-size: 14px; color: var(--muted); margin-top: 12px; }
+
+  /* phone mock */
+  .phone {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 32px; padding: 20px 16px;
+    max-width: 340px; width: 100%; margin: 0 auto; box-shadow: 0 20px 40px -24px rgba(60,40,20,.35);
+  }
+  .phone h3 { margin: 0 0 4px; font-size: 17px; }
+  .phone .sub { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 4px; border-top: 1px solid var(--line); }
+  .row:first-of-type { border-top: 0; }
+  .row .name { font-weight: 600; font-size: 15px; }
+  .row .when { font-size: 12px; color: var(--muted); }
+  .pill { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .pill.ok { color: var(--ok); background: var(--ok-bg); }
+  .pill.warn { color: var(--warn); background: var(--warn-bg); }
+  .pill.bad { color: var(--bad); background: var(--bad-bg); }
+  .pill.idle { color: var(--idle); background: var(--idle-bg); }
+  .tap { margin-top: 12px; width: 100%; min-height: 44px; border-radius: 12px; border: 1px dashed var(--line); background: var(--surface-2); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; }
+
+  section { padding: 40px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(22px, 4vw, 30px); line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 20px; text-wrap: balance; }
+  .grid { display: grid; gap: 16px; }
+  @media (min-width: 720px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: repeat(2, 1fr); } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); }
+  .quote { font-size: 15px; color: var(--muted); border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; margin: 0; }
+
+  .prices { display: grid; gap: 12px; }
+  @media (min-width: 720px) { .prices { grid-template-columns: repeat(3, 1fr); } }
+  .price { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .price .amt { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .price .per { color: var(--muted); font-size: 14px; }
+  .price.best { border-color: var(--accent); }
+  .free { margin-top: 16px; color: var(--muted); }
+
+  form { display: grid; gap: 18px; max-width: 620px; }
+  label, legend { font-weight: 600; font-size: 15px; }
+  fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .opt { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer; }
+  .opt input { margin-top: 3px; accent-color: var(--accent); width: 18px; height: 18px; flex: none; }
+  input[type=text], input[type=number], select {
+    width: 100%; min-height: 48px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--text); font: inherit;
+  }
+  .hint { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .consent { font-weight: 400; font-size: 14px; display: flex; gap: 10px; align-items: flex-start; }
+  .consent input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+  #msg { min-height: 1.5em; font-weight: 600; }
+  #msg.ok { color: var(--ok); } #msg.err { color: var(--bad); }
+
+  .disclaimer { font-size: 14px; color: var(--muted); }
+  footer { padding: 32px 0 48px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); }
+  footer a { color: inherit; }
+  .sr, input.sr { position: absolute; left: 0; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand" data-i="brand">Дневник аллергенов</div>
+    <div class="langs" role="group" aria-label="Language">
+      <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+      <button type="button" data-lang="uz" aria-pressed="false">UZ</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1 data-i="h1">Яйцо — 5 дней назад. Арахис — пора повторить.</h1>
+      <p class="lead" data-i="lead">Дневник прикорма для малышей от 4 месяцев до 2 лет. Показывает, какие аллергены вы уже ввели, когда давали последний раз и когда пора дать снова.</p>
+      <a class="cta" href="#join" data-i="cta">Хочу попробовать</a>
+      <p class="note" data-i="cta_note">Приложение в разработке. Оставьте контакт — пригласим в бета-тест бесплатно.</p>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <h3 data-i="m_title">Аллергены</h3>
+      <p class="sub" data-i="m_sub">Амир, 8 мес.</p>
+      <div class="row"><div><div class="name" data-i="m_egg">Яйцо</div><div class="when" data-i="m_egg_w">5 дней назад</div></div><span class="pill ok" data-i="m_keep">Повторяем</span></div>
+      <div class="row"><div><div class="name" data-i="m_peanut">Арахис</div><div class="when" data-i="m_peanut_w">9 дней назад</div></div><span class="pill warn" data-i="m_due">Пора дать</span></div>
+      <div class="row"><div><div class="name" data-i="m_milk">Коровье молоко</div><div class="when" data-i="m_milk_w">вчера</div></div><span class="pill ok" data-i="m_keep2">Повторяем</span></div>
+      <div class="row"><div><div class="name" data-i="m_fish">Рыба</div><div class="when" data-i="m_fish_w">реакция 12 окт.</div></div><span class="pill bad" data-i="m_react">Реакция</span></div>
+      <div class="row"><div><div class="name" data-i="m_sesame">Кунжут</div><div class="when">—</div></div><span class="pill idle" data-i="m_none">Не вводили</span></div>
+      <button class="tap" type="button" tabindex="-1" data-i="m_tap">+ Дали сегодня</button>
+    </div>
+  </div>
+
+  <section>
+    <h2 data-i="p_h">Знакомо?</h2>
+    <div class="grid three">
+      <div class="card"><h3 data-i="p1_h">«Когда мы давали яйцо?»</h3><p data-i="p1">Аллергены советуют не только ввести, но и потом давать регулярно. Через месяц уже не вспомнить, что и когда было.</p></div>
+      <div class="card"><h3 data-i="p2_h">Листок на холодильнике</h3><p data-i="p2">Отмечать, что попробовали, ещё получается. Посчитать, сколько дней прошло с последнего раза, — уже нет.</p></div>
+      <div class="card"><h3 data-i="p3_h">Приложения ломаются</h3><p data-i="p3">В популярных трекерах аллерген «застревает» в статусе «не начат», хотя вы давали его всю неделю. И стоят они около $100 в год.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i="f_h">Что умеет</h2>
+    <div class="grid two">
+      <div class="card"><h3 data-i="f1_h">Один тап — «дали сегодня»</h3><p data-i="f1">Отметка прямо в списке аллергенов. Быстрее, чем зачеркнуть строчку на холодильнике.</p></div>
+      <div class="card"><h3 data-i="f2_h">Дни с последнего раза</h3><p data-i="f2">Для каждого аллергена видно, сколько дней прошло. Статус пересчитывается из ваших записей и не «застревает».</p></div>
+      <div class="card"><h3 data-i="f3_h">Напоминание повторить</h3><p data-i="f3">Интервал вы выбираете сами вместе с педиатром — например, раз в неделю. После реакции напоминания по этому продукту выключаются.</p></div>
+      <div class="card"><h3 data-i="f4_h">Без регистрации</h3><p data-i="f4">Не нужен аккаунт и код из письма. Данные хранятся только на вашем телефоне.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i="o_h">Как часто давать аллерген после ввода?</h2>
+    <div class="card">
+      <p data-i="o1">Британские (BSACI) и австралийские (Nip allergies in the Bub) рекомендации советуют давать уже введённый аллерген хотя бы раз в неделю. NHS говорит, что он должен стать частью обычного рациона. Сколько это продолжать, точных данных нет.</p>
+      <p style="margin-top:12px" data-i="o2">Поэтому приложение не назначает схему: интервал вы ставите сами, по совету своего педиатра.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i="pr_h">Сколько будет стоить</h2>
+    <div class="prices">
+      <div class="price"><div class="per" data-i="pr_m_l">Месяц</div><div class="amt" data-i="pr_m">$3.99</div><div class="per" data-i="pr_m_n">в месяц</div></div>
+      <div class="price best"><div class="per" data-i="pr_y_l">Год</div><div class="amt" data-i="pr_y">$24.99</div><div class="per" data-i="pr_y_n">≈ $2 в месяц</div></div>
+      <div class="price"><div class="per" data-i="pr_l_l">Навсегда</div><div class="amt" data-i="pr_l">$39.99</div><div class="per" data-i="pr_l_n">один раз</div></div>
+    </div>
+    <p class="free" data-i="pr_free">Все аллергены, напоминания и реакции — бесплатно и без срока, плюс 10 других продуктов. Ваша история никогда не блокируется: всё, что записали, остаётся доступным, даже если подписка закончилась. Цена в App Store будет в местной валюте.</p>
+  </section>
+
+  <section id="join">
+    <h2 data-i="j_h">Забронировать цену основателя</h2>
+    <p class="lead" style="font-size:16px" data-i="j_lead">Первые 100 человек получат «Навсегда» за $29.99 вместо $39.99 и бесплатный доступ к бета-версии. Сейчас ничего платить не нужно — напишем, когда приложение будет готово.</p>
+
+    <form id="f" method="POST" action="https://formspree.io/f/xqppevvk" novalidate>
+      <fieldset>
+        <legend data-i="q_plan">Что бы вы выбрали?</legend>
+        <label class="opt"><input type="radio" name="plan" value="lifetime_founder" required><span data-i="q_plan_1">«Навсегда» за $29.99 — цена основателя</span></label>
+        <label class="opt"><input type="radio" name="plan" value="year"><span data-i="q_plan_2">Год за $24.99</span></label>
+        <label class="opt"><input type="radio" name="plan" value="month"><span data-i="q_plan_3">Месяц за $3.99</span></label>
+        <label class="opt"><input type="radio" name="plan" value="free_only"><span data-i="q_plan_4">Только бесплатная версия</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i="q_pay">Как вы обычно платите в App Store?</legend>
+        <label class="opt"><input type="radio" name="pay" value="card"><span data-i="q_pay_1">Банковской картой</span></label>
+        <label class="opt"><input type="radio" name="pay" value="phone_balance"><span data-i="q_pay_2">Со счёта мобильного телефона</span></label>
+        <label class="opt"><input type="radio" name="pay" value="gift_card"><span data-i="q_pay_3">Подарочной картой / пополнением Apple ID</span></label>
+        <label class="opt"><input type="radio" name="pay" value="never"><span data-i="q_pay_4">Не плачу / не получается заплатить</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i="q_share">Кто ещё кормит ребёнка?</legend>
+        <span class="hint" data-i="q_share_h">Можно выбрать несколько</span>
+        <label class="opt"><input type="checkbox" name="feeds" value="only_me"><span data-i="q_share_1">Только я</span></label>
+        <label class="opt"><input type="checkbox" name="feeds" value="partner"><span data-i="q_share_2">Муж / партнёр</span></label>
+        <label class="opt"><input type="checkbox" name="feeds" value="grandparent"><span data-i="q_share_3">Бабушка или дедушка</span></label>
+        <label class="opt"><input type="checkbox" name="feeds" value="nanny_daycare"><span data-i="q_share_4">Няня или садик</span></label>
+        <label class="opt"><input type="checkbox" name="feeds" value="other_language"><span data-i="q_share_5">Кто-то из них говорит на другом языке, чем я</span></label>
+      </fieldset>
+
+      <div>
+        <label for="age" data-i="q_age">Сколько месяцев ребёнку?</label>
+        <input id="age" name="child_age_months" type="number" inputmode="numeric" min="0" max="48" placeholder="7">
+        <span class="hint" data-i="q_age_h">Если ещё не начали прикорм — тоже подходит</span>
+      </div>
+
+      <div>
+        <label for="contact" data-i="q_contact">Telegram или email</label>
+        <input id="contact" name="contact" type="text" autocomplete="email" required placeholder="@username">
+        <span class="hint" data-i="q_contact_h">Напишем только о запуске и бета-тесте</span>
+      </div>
+
+      <label class="consent"><input type="checkbox" name="consent" value="yes" required><span data-i="q_consent">Можно написать мне по этому контакту. Данные удалят по первому запросу.</span></label>
+
+      <input type="hidden" name="lang" value="ru">
+      <input type="hidden" name="utm_source">
+      <input type="hidden" name="utm_medium">
+      <input type="hidden" name="utm_campaign">
+      <input type="hidden" name="referrer">
+      <input type="text" name="_gotcha" class="sr" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <div><button class="cta" type="submit" data-i="q_submit">Забронировать</button></div>
+      <div id="msg" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section>
+    <p class="disclaimer" data-i="disc">Приложение помогает вести учёт и не заменяет консультацию педиатра или аллерголога. Порядок и сроки ввода продуктов обсудите с врачом, особенно если у ребёнка тяжёлая экзема или уже была аллергия. При признаках тяжёлой реакции — затруднённое дыхание, отёк лица или губ, вялость — сразу вызывайте скорую (103).</p>
+  </section>
+
+  <footer>
+    <span data-i="foot">Контакты, которые вы оставили, хранятся в сервисе форм Formspree и используются только для приглашения в бета-тест и сообщения о запуске. Чтобы удалить данные, напишите:</span>
+    <a href="mailto:rusmirolub@gmail.com">rusmirolub@gmail.com</a>
+    · <a href="privacy" data-legal>Privacy</a> · <a href="terms" data-legal>Terms</a>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var T = {
+    ru: {}, // RU is the markup itself; filled from the DOM on load
+    uz: {
+      brand: "Allergen kundaligi",
+      h1: "Tuxum — 5 kun oldin. Yeryongʻoq — takrorlash vaqti.",
+      lead: "4 oylikdan 2 yoshgacha boʻlgan chaqaloqlar uchun qoʻshimcha ovqat kundaligi. Qaysi allergenlar kiritilgani, oxirgi marta qachon berilgani va qachon yana berish kerakligini koʻrsatadi.",
+      cta: "Sinab koʻrmoqchiman",
+      cta_note: "Ilova ishlab chiqilmoqda. Kontaktingizni qoldiring — beta-testga bepul taklif qilamiz.",
+      m_title: "Allergenlar", m_sub: "Amir, 8 oy",
+      m_egg: "Tuxum", m_egg_w: "5 kun oldin", m_keep: "Takrorlanmoqda",
+      m_peanut: "Yeryongʻoq", m_peanut_w: "9 kun oldin", m_due: "Berish vaqti",
+      m_milk: "Sigir suti", m_milk_w: "kecha", m_keep2: "Takrorlanmoqda",
+      m_fish: "Baliq", m_fish_w: "reaksiya 12-okt.", m_react: "Reaksiya",
+      m_sesame: "Kunjut", m_none: "Kiritilmagan", m_tap: "+ Bugun berdik",
+      p_h: "Tanishmi?",
+      p1_h: "«Tuxumni qachon bergan edik?»", p1: "Allergenni faqat kiritish emas, keyin muntazam berib turish ham tavsiya etiladi. Bir oydan keyin nima qachon boʻlganini eslab boʻlmaydi.",
+      p2_h: "Muzlatkichdagi varaq", p2: "Nimani tatib koʻrganini belgilash mumkin. Oxirgi martadan beri necha kun oʻtganini hisoblash — yoʻq.",
+      p3_h: "Ilovalar buziladi", p3: "Mashhur trekerlarda allergen butun hafta berilgan boʻlsa ham «boshlanmagan» holatida qolib ketadi. Narxi esa yiliga taxminan $100.",
+      f_h: "Nimalar qila oladi",
+      f1_h: "Bir bosish — «bugun berdik»", f1: "Belgi toʻgʻridan-toʻgʻri allergenlar roʻyxatida. Muzlatkichdagi qatorni chizishdan ham tezroq.",
+      f2_h: "Oxirgi martadan beri kunlar", f2: "Har bir allergen uchun necha kun oʻtgani koʻrinadi. Holat yozuvlaringizdan qayta hisoblanadi va «qotib qolmaydi».",
+      f3_h: "Takrorlash eslatmasi", f3: "Oraliqni pediatr bilan birga oʻzingiz tanlaysiz — masalan, haftada bir marta. Reaksiyadan keyin shu mahsulot boʻyicha eslatmalar oʻchadi.",
+      f4_h: "Roʻyxatdan oʻtishsiz", f4: "Akkaunt va xatdagi kod kerak emas. Maʼlumotlar faqat telefoningizda saqlanadi.",
+      o_h: "Kiritilgan allergenni qanchalik tez-tez berish kerak?",
+      o1: "Britaniya (BSACI) va Avstraliya (Nip allergies in the Bub) tavsiyalari kiritilgan allergenni kamida haftada bir marta berishni maslahat beradi. NHS uni oddiy ratsionning bir qismiga aylantirish kerakligini aytadi. Buni qancha davom ettirish haqida aniq maʼlumot yoʻq.",
+      o2: "Shuning uchun ilova sxema belgilamaydi: oraliqni pediatringiz maslahati bilan oʻzingiz qoʻyasiz.",
+      pr_h: "Narxi qancha boʻladi",
+      pr_m_l: "Oy", pr_m: "$3.99", pr_m_n: "oyiga",
+      pr_y_l: "Yil", pr_y: "$24.99", pr_y_n: "≈ oyiga $2",
+      pr_l_l: "Umrbod", pr_l: "$39.99", pr_l_n: "bir marta",
+      pr_free: "Barcha allergenlar, eslatmalar va reaksiyalar — bepul va muddatsiz, yana 10 ta boshqa mahsulot. Tarixingiz hech qachon bloklanmaydi: yozganlaringiz obuna tugasa ham ochiq qoladi.",
+      j_h: "Asoschi narxini band qilish",
+      j_lead: "Dastlabki 100 kishi «Umrbod» tarifni $39.99 oʻrniga $29.99 ga va beta-versiyaga bepul kirishni oladi. Hozir hech narsa toʻlash shart emas — ilova tayyor boʻlganda yozamiz.",
+      q_plan: "Qaysi birini tanlagan boʻlardingiz?",
+      q_plan_1: "«Umrbod» $29.99 — asoschi narxi", q_plan_2: "Yil — $24.99", q_plan_3: "Oy — $3.99", q_plan_4: "Faqat bepul versiya",
+      q_pay: "App Store’da odatda qanday toʻlaysiz?",
+      q_pay_1: "Bank kartasi bilan", q_pay_2: "Mobil telefon hisobidan", q_pay_3: "Sovgʻa kartasi / Apple ID’ni toʻldirish", q_pay_4: "Toʻlamayman / toʻlab boʻlmaydi",
+      q_share: "Bolani yana kim ovqatlantiradi?", q_share_h: "Bir nechtasini tanlash mumkin",
+      q_share_1: "Faqat men", q_share_2: "Turmush oʻrtogʻim", q_share_3: "Buvi yoki bobo", q_share_4: "Enaga yoki bogʻcha", q_share_5: "Ulardan kimdir men bilan boshqa tilda gaplashadi",
+      q_age: "Bola necha oylik?", q_age_h: "Qoʻshimcha ovqat hali boshlanmagan boʻlsa ham mos keladi",
+      q_contact: "Telegram yoki email", q_contact_h: "Faqat ishga tushirish va beta-test haqida yozamiz",
+      q_consent: "Shu kontakt orqali menga yozishlariga roziman. Birinchi soʻrov boʻyicha maʼlumotlar oʻchiriladi.",
+      q_submit: "Band qilish",
+      disc: "Ilova hisob yuritishga yordam beradi va pediatr yoki allergolog maslahatining oʻrnini bosmaydi. Mahsulotlarni kiritish tartibi va muddatlarini shifokor bilan kelishing, ayniqsa bolada ogʻir ekzema yoki allergiya boʻlgan boʻlsa. Ogʻir reaksiya belgilari — nafas qisishi, yuz yoki lablar shishi, holsizlik — boʻlsa, darhol tez yordam chaqiring (103).",
+      foot: "Siz qoldirgan kontaktlar Formspree xizmatida saqlanadi va faqat beta-testga taklif qilish hamda ishga tushirish haqida xabar berish uchun ishlatiladi. Maʼlumotlarni oʻchirish uchun yozing:",
+      ok: "Rahmat! Ilova tayyor boʻlganda yozamiz.", err: "Yuborib boʻlmadi. Keyinroq yana urinib koʻring.", need: "Tarifni tanlang, kontakt va roziligingizni koʻrsating.", cfg: "Shakl hali sozlanmagan."
+    },
+    en: {
+      brand: "Allergen Diary",
+      h1: "Egg — 5 days ago. Peanut — time to offer again.",
+      lead: "A starting-solids diary for babies from 4 months to 2 years. See which allergens you've introduced, when your baby last had each one, and when it's time to offer it again.",
+      cta: "I want early access",
+      cta_note: "The app is in development. Leave your contact and we'll invite you to the free beta.",
+      m_title: "Allergens", m_sub: "Amir, 8 mo",
+      m_egg: "Egg", m_egg_w: "5 days ago", m_keep: "Keeping in",
+      m_peanut: "Peanut", m_peanut_w: "9 days ago", m_due: "Due",
+      m_milk: "Cow's milk", m_milk_w: "yesterday", m_keep2: "Keeping in",
+      m_fish: "Fish", m_fish_w: "reaction Oct 12", m_react: "Reaction",
+      m_sesame: "Sesame", m_none: "Not started", m_tap: "+ Had it today",
+      p_h: "Sound familiar?",
+      p1_h: "“When did we last do egg?”", p1: "Allergens aren't just introduced once — they're meant to stay in the diet. A month in, nobody remembers what was given when.",
+      p2_h: "The chart on the fridge", p2: "Ticking off what's been tried works. Working out how many days since the last time doesn't.",
+      p3_h: "Apps that get stuck", p3: "In popular trackers an allergen stays “not started” even after you've logged it all week — and they cost around $100 a year.",
+      f_h: "What it does",
+      f1_h: "One tap — “had it today”", f1: "Mark it right in the allergen list. Faster than crossing off a line on the fridge.",
+      f2_h: "Days since last time", f2: "Every allergen shows how many days it's been. Status is recalculated from your entries, so it never gets stuck.",
+      f3_h: "Reminders to offer again", f3: "You set the interval with your pediatrician — for example, once a week. After a reaction, reminders for that food stop.",
+      f4_h: "No account", f4: "No sign-up, no email codes. Your data stays on your phone only.",
+      o_h: "How often should you keep giving an allergen?",
+      o1: "UK (BSACI) and Australian (Nip allergies in the Bub) guidance suggests offering an introduced allergen at least once a week. The NHS says it should become part of your baby's usual diet. There's no clear research on how long to continue.",
+      o2: "So the app doesn't prescribe a schedule: you set the interval, following your own pediatrician's advice.",
+      pr_h: "What it will cost",
+      pr_m_l: "Monthly", pr_m: "$3.99", pr_m_n: "per month",
+      pr_y_l: "Yearly", pr_y: "$24.99", pr_y_n: "≈ $2 a month",
+      pr_l_l: "Lifetime", pr_l: "$39.99", pr_l_n: "one time",
+      pr_free: "All allergens, reminders and reactions are free with no time limit, plus 10 other foods. Your history is never locked: everything you've logged stays readable even if your subscription ends.",
+      j_h: "Reserve the founder price",
+      j_lead: "The first 100 people get Lifetime for $29.99 instead of $39.99, plus free beta access. Nothing to pay now — we'll message you when the app is ready.",
+      q_plan: "Which would you choose?",
+      q_plan_1: "Lifetime for $29.99 — founder price", q_plan_2: "Yearly for $24.99", q_plan_3: "Monthly for $3.99", q_plan_4: "Only the free version",
+      q_pay: "How do you usually pay in the App Store?",
+      q_pay_1: "Bank card", q_pay_2: "Mobile phone balance", q_pay_3: "Gift card / Apple ID top-up", q_pay_4: "I don't pay / can't pay",
+      q_share: "Who else feeds your baby?", q_share_h: "Choose all that apply",
+      q_share_1: "Only me", q_share_2: "Partner", q_share_3: "Grandparent", q_share_4: "Nanny or daycare", q_share_5: "One of them speaks a different language than I do",
+      q_age: "How old is your baby, in months?", q_age_h: "Haven't started solids yet? That's fine too",
+      q_contact: "Telegram or email", q_contact_h: "We'll only write about the launch and the beta",
+      q_consent: "I agree to be contacted at this address. My data will be deleted on request.",
+      q_submit: "Reserve",
+      disc: "This app helps you keep records. It is not a substitute for advice from your pediatrician or allergist. Talk to your doctor about when and how to introduce foods, especially if your baby has severe eczema or a known food allergy. If you see signs of a severe reaction — trouble breathing, swelling of the face or lips, floppiness — call emergency services right away.",
+      foot: "Contacts you leave are stored with the form service Formspree and used only to invite you to the beta and tell you about the launch. To delete your data, email:",
+      ok: "Thank you! We'll message you when the app is ready.", err: "Couldn't send. Please try again later.", need: "Please choose an option, add your contact and tick the consent box.", cfg: "The form isn't configured yet."
+    }
+  };
+  var ruMsg = { ok: "Спасибо! Напишем, когда приложение будет готово.", err: "Не получилось отправить. Попробуйте ещё раз позже.", need: "Выберите тариф, укажите контакт и отметьте согласие.", cfg: "Форма ещё не настроена." };
+  var titles = { ru: "Дневник аллергенов", uz: "Allergen kundaligi", en: "Allergen Diary" };
+
+  var nodes = document.querySelectorAll('[data-i]');
+  nodes.forEach(function (n) { T.ru[n.getAttribute('data-i')] = n.textContent; });
+  Object.keys(ruMsg).forEach(function (k) { T.ru[k] = ruMsg[k]; });
+
+  var form = document.getElementById('f');
+  var msg = document.getElementById('msg');
+  var lang = 'ru';
+
+  function apply(l) {
+    lang = T[l] ? l : 'ru';
+    nodes.forEach(function (n) { var v = T[lang][n.getAttribute('data-i')]; if (v) n.textContent = v; });
+    document.documentElement.lang = lang;
+    document.title = titles[lang];
+    document.querySelectorAll('.langs button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
+    form.elements.lang.value = lang;
+    msg.textContent = ''; msg.className = '';
+    try { localStorage.setItem('lang', lang); } catch (e) {}
+    try { var u = new URL(location.href); u.searchParams.set('lang', lang); history.replaceState(null, '', u); } catch (e) {}
+  }
+
+  var params = new URLSearchParams(location.search);
+  ['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) { form.elements[k].value = params.get(k) || ''; });
+  form.elements.referrer.value = document.referrer || '';
+
+  var initial = params.get('lang');
+  if (!initial) { try { initial = localStorage.getItem('lang'); } catch (e) {} }
+  if (!initial) {
+    var nav = (navigator.language || 'ru').slice(0, 2).toLowerCase();
+    initial = nav === 'uz' ? 'uz' : nav === 'en' ? 'en' : 'ru';
+  }
+  apply(initial);
+
+  document.querySelectorAll('.langs button').forEach(function (b) {
+    b.addEventListener('click', function () { apply(b.dataset.lang); track('lang-' + b.dataset.lang); });
+  });
+
+  function track(name) {
+    try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {}
+  }
+
+  var started = false;
+  form.addEventListener('input', function () { if (!started) { started = true; track('form-start-' + lang); } });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.className = '';
+    var plan = form.querySelector('input[name=plan]:checked');
+    if (!plan || !form.elements.contact.value.trim() || !form.elements.consent.checked) {
+      msg.textContent = T[lang].need; msg.className = 'err'; return;
+    }
+    if (form.action.indexOf('YOUR_FORM_ID') !== -1) { msg.textContent = T[lang].cfg; msg.className = 'err'; return; }
+    var data = new FormData(form);
+    data.set('feeds', Array.prototype.map.call(form.querySelectorAll('input[name=feeds]:checked'), function (x) { return x.value; }).join(','));
+    var btn = form.querySelector('button[type=submit]'); btn.disabled = true;
+    fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        msg.textContent = T[lang].ok; msg.className = 'ok';
+        form.querySelectorAll('input, button').forEach(function (el) { el.disabled = true; });
+        track('submit-' + lang + '-' + plan.value);
+      })
+      .catch(function () { msg.textContent = T[lang].err; msg.className = 'err'; btn.disabled = false; });
+  });
+})();
+</script>
+<!-- Visitor counting (no cookies). Replace komolbek with your GoatCounter code, or delete this line. -->
+<script data-goatcounter="https://komolbek.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
